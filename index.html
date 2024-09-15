@@ -50,6 +50,7 @@
       <button id="openLabButton" class="button is-link">Open in Stellar Laboratory</button>
       <button id="openSignToolsButton" class="button is-link">Open EURMTL Sign Tools</button>
     </div>
+    <div id="messageContainer" class="container mt-3"></div>
   </section>
 
 
@@ -57,6 +58,19 @@
     const storedFundAddress = localStorage.getItem('fundAddress');
     if (storedFundAddress) {
       document.getElementById('fundAddress').value = storedFundAddress;
+    }
+
+    function showMessage(message, isError = false) {
+      const messageContainer = document.getElementById('messageContainer');
+      messageContainer.innerHTML = `
+        <div class="notification ${isError ? 'is-danger' : 'is-success'}">
+          <button class="delete"></button>
+          ${message}
+        </div>
+      `;
+      messageContainer.querySelector('.delete').addEventListener('click', function() {
+        messageContainer.innerHTML = '';
+      });
     }
 
     async function createLoanTransaction(assetName, amount, fundAccountPubKey, borrowerAccountPubKey) {
@@ -96,9 +110,10 @@
     document.getElementById('copyButton').addEventListener('click', function () {
       const xdr = document.getElementById('result').textContent;
       navigator.clipboard.writeText(xdr).then(function () {
-        alert('Transaction XDR copied to clipboard!');
+        showMessage('Transaction XDR copied to clipboard!');
       }, function (err) {
         console.error('Could not copy text: ', err);
+        showMessage('Could not copy text to clipboard.', true);
       });
     });
 
@@ -108,7 +123,7 @@
         const labUrl = `https://lab.stellar.org/transaction/sign?$=network$id=mainnet&label=Mainnet&horizonUrl=https:////horizon.stellar.org&rpcUrl=&passphrase=Public%20Global%20Stellar%20Network%20/;%20September%202015;&transaction$sign$activeView=overview&importXdr=${xdr.replace(/\//g, '//')}`;
         window.open(labUrl, '_blank');
       } else {
-        alert('Please generate a transaction first.');
+        showMessage('Please generate a transaction first.', true);
       }
     });
 
@@ -125,7 +140,7 @@
         document.getElementById('resultContainer').classList.remove('is-hidden');
         document.getElementById('result').textContent = xdr;
       } catch (error) {
-        document.getElementById('result').textContent = `Error: ${error.message}`;
+        showMessage(`Error: ${error.message}`, true);
       }
     });
   </script>
