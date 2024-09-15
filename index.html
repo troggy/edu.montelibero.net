@@ -48,6 +48,7 @@
 
       <button id="copyButton" class="button is-info">Copy to Clipboard</button>
       <button id="openLabButton" class="button is-link">Open in Stellar Laboratory</button>
+      <button id="openSignToolsButton" class="button is-link">Open EURMTL Sign Tools</button>
     </div>
   </section>
 
@@ -87,6 +88,10 @@
 
       return transaction.toXDR();
     }
+
+    document.getElementById('openSignToolsButton').addEventListener('click', function () {
+      window.open('https://eurmtl.me/sign_tools', '_blank');
+    });
 
     document.getElementById('copyButton').addEventListener('click', function () {
       const xdr = document.getElementById('result').textContent;
