@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MTL EDU Loan Transaction Generator</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@stellar/stellar-sdk@12.2.0/dist/stellar-sdk.min.js"></script>
+</head>
+
+<body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title">MTL EDU Loan Transaction Generator</h1>
+      <form id="loanForm" class="mb-5">
+        <div class="field">
+          <label class="label" for="amount">Loan Amount:</label>
+          <div class="control">
+            <input class="input" type="number" id="amount" required>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label" for="borrowerAddress">Borrower Address:</label>
+          <div class="control">
+            <input class="input" type="text" id="borrowerAddress" required>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label" for="fundAddress">Fund Address:</label>
+          <div class="control">
+            <input class="input" type="text" id="fundAddress" required>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="control">
+            <button type="submit" class="button is-primary">Generate Transaction</button>
+          </div>
+        </div>
+      </form>
+
+      <h2 class="subtitle">Transaction XDR:</h2>
+      <div id="result" class="box has-background-light mb-3" style="word-wrap: break-word"></div>
+
+      <button id="copyButton" class="button is-info is-hidden">Copy to Clipboard</button>
+      <button id="openLabButton" class="button is-link is-hidden">Open in Stellar Laboratory</button>
+    </div>
+  </section>
+
+
+  <script>
+    const storedFundAddress = localStorage.getItem('fundAddress');
+    if (storedFundAddress) {
+      document.getElementById('fundAddress').value = storedFundAddress;
+    }
+
+    async function createLoanTransaction(assetName, amount, fundAccountPubKey, borrowerAccountPubKey) {
+      const server = new StellarSdk.Horizon.Server('https://horizon.stellar.org');
+      const fundAccount = await server.loadAccount(fundAccountPubKey);
+      const debtAsset = new StellarSdk.Asset(assetName, borrowerAccountPubKey);
+      const eurmtlAsset = new StellarSdk.Asset('EURMTL', 'GACKTN5DAZGWXRWB2WLM6OPBDHAMT6SJNGLJZPQMEZBUR4JUGBX2UK7V');
+
+      const transaction = new StellarSdk.TransactionBuilder(fundAccount, {
+        fee: await server.fetchBaseFee(),
+        networkPassphrase: StellarSdk.Networks.PUBLIC,
+      })
+        .addOperation(StellarSdk.Operation.changeTrust({
+          asset: debtAsset,
+        }))
+        .addOperation(StellarSdk.Operation.payment({
+          source: borrowerAccountPubKey,
+          destination: fundAccountPubKey,
+          asset: debtAsset,
+          amount: amount,
+        }))
+        .addOperation(StellarSdk.Operation.payment({
+          destination: borrowerAccountPubKey,
+          asset: eurmtlAsset,
+          amount: amount,
+        }))
+        .setTimeout(7 * 24 * 60 * 60)
+        .build();
+
+      return transaction.toXDR();
+    }
+
+    document.getElementById('copyButton').addEventListener('click', function () {
+      const xdr = document.getElementById('result').textContent;
+      navigator.clipboard.writeText(xdr).then(function () {
+        alert('Transaction XDR copied to clipboard!');
+      }, function (err) {
+        console.error('Could not copy text: ', err);
+      });
+    });
+
+    document.getElementById('openLabButton').addEventListener('click', function () {
+      const xdr = document.getElementById('result').textContent;
+      if (xdr) {
+        const labUrl = `https://lab.stellar.org/transaction/sign?$=network$id=mainnet&label=Mainnet&horizonUrl=https:////horizon.stellar.org&rpcUrl=&passphrase=Public%20Global%20Stellar%20Network%20/;%20September%202015;&transaction$sign$activeView=overview&importXdr=${xdr.replace(/\//g, '//')}`;
+        window.open(labUrl, '_blank');
+      } else {
+        alert('Please generate a transaction first.');
+      }
+    });
+
+    document.getElementById('loanForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const amount = document.getElementById('amount').value;
+      const borrowerAddress = document.getElementById('borrowerAddress').value;
+      const fundAddress = document.getElementById('fundAddress').value;
+      localStorage.setItem('fundAddress', fundAddress);
+      const assetName = `MTLEDU${String(Math.floor(Math.random() * 9999) + 1).padStart(4, '0')}`;
+
+      try {
+        const xdr = await createLoanTransaction(assetName, amount, fundAddress, borrowerAddress);
+        document.getElementById('result').textContent = xdr;
+        document.getElementById('copyButton').classList.remove('is-hidden');
+        document.getElementById('openLabButton').classList.remove('is-hidden');
+      } catch (error) {
+        document.getElementById('result').textContent = `Error: ${error.message}`;
+      }
+    });
+  </script>
+</body>
+
+</html>
