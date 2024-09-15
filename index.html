@@ -41,12 +41,13 @@
           </div>
         </div>
       </form>
-
+    </div>
+    <div class="container is-hidden" id="resultContainer">
       <h2 class="subtitle">Transaction XDR:</h2>
       <div id="result" class="box has-background-light mb-3" style="word-wrap: break-word"></div>
 
-      <button id="copyButton" class="button is-info is-hidden">Copy to Clipboard</button>
-      <button id="openLabButton" class="button is-link is-hidden">Open in Stellar Laboratory</button>
+      <button id="copyButton" class="button is-info">Copy to Clipboard</button>
+      <button id="openLabButton" class="button is-link">Open in Stellar Laboratory</button>
     </div>
   </section>
 
@@ -116,9 +117,8 @@
 
       try {
         const xdr = await createLoanTransaction(assetName, amount, fundAddress, borrowerAddress);
+        document.getElementById('resultContainer').classList.remove('is-hidden');
         document.getElementById('result').textContent = xdr;
-        document.getElementById('copyButton').classList.remove('is-hidden');
-        document.getElementById('openLabButton').classList.remove('is-hidden');
       } catch (error) {
         document.getElementById('result').textContent = `Error: ${error.message}`;
       }
