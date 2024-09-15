@@ -78,7 +78,6 @@
       <div id="result" class="box has-background-light mb-3" style="word-wrap: break-word"></div>
 
       <button id="copyButton" class="button is-info">Copy to Clipboard</button>
-      <button id="openLabButton" class="button is-link">Open in Stellar Laboratory</button>
       <button id="openSignToolsButton" class="button is-link">Open EURMTL Sign Tools</button>
     </div>
     <div id="messageContainer" class="container mt-3"></div>
@@ -155,16 +154,6 @@
         console.error('Could not copy text: ', err);
         showMessage('Could not copy text to clipboard.', true);
       });
-    });
-
-    document.getElementById('openLabButton').addEventListener('click', function () {
-      const xdr = document.getElementById('result').textContent;
-      if (xdr) {
-        const labUrl = `https://lab.stellar.org/transaction/sign?$=network$id=mainnet&label=Mainnet&horizonUrl=https:////horizon.stellar.org&rpcUrl=&passphrase=Public%20Global%20Stellar%20Network%20/;%20September%202015;&transaction$sign$activeView=overview&importXdr=${xdr.replace(/\//g, '//')}`;
-        window.open(labUrl, '_blank');
-      } else {
-        showMessage('Please generate a transaction first.', true);
-      }
     });
 
     document.getElementById('loanForm').addEventListener('submit', async function (e) {
