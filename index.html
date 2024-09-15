@@ -12,7 +12,22 @@
 <body>
   <section class="section">
     <div class="container">
-      <h1 class="title">MTL EDU Loan Transaction Generator</h1>
+      <h1 class="title is-2">MTL EDU Loan Transaction Generator</h1>
+      <h2 class="title is-4">Step 1. Generate Transaction <a class="is-link is-size-7 ml-2"
+          onClick="toggle('generateHelp')">help</a></h2>
+
+      <div class="box is-hidden" id="generateHelp">
+        <p>Generated transaction will do the following operations:
+        <ul>
+          <li>- open trustline to Debt Token on Fund Fund Account</li>
+          <li>- send given amount of EURMTL from Fund Account to Borrower Account</li>
+          <li>- mint and send same amount of Debt Token from Borrower Account to Fund Account</li>
+        </ul>
+        </p>
+        <br />
+        <p>Debt token token name will be random starting with MTLEDU prefix</p>
+        <p></p>
+      </div>
       <form id="loanForm" class="mb-5">
         <div class="field">
           <label class="label" for="amount">Loan Amount:</label>
@@ -43,6 +58,22 @@
       </form>
     </div>
     <div class="container is-hidden" id="resultContainer">
+      <h2 class="title is-4">Step 2. Sign transaction <a class="is-link is-size-7 ml-2"
+          onClick="toggle('signHelp')">help</a></h2>
+      <div class="box is-hidden" id="signHelp">
+        <p>Transaction needs to be signed by both Borrower and Fund, so it is multisig.</p>
+        <p>The easiest way to do this is to add XDR to <a href="https://eurmtl.me/sign_tools" target="_blank">EURMTL
+            Sign Tools</a>:</p>
+        <p>
+        <ul>
+          <li>- paste XDR to Sign Tools, add some description and click 'Create'</li>
+          <li>- sign tx with Fund Private Key (may be done on Sign Tools directly or in MyMTLWallet or in Stellar
+            Laboratory)</li>
+          <li>- share the link with Borrower so he can sign too</li>
+          <li>- once both signed, submit tx to the network (can be done in Sign Tools)</li>
+        </ul>
+        </p>
+      </div>
       <h2 class="subtitle">Transaction XDR:</h2>
       <div id="result" class="box has-background-light mb-3" style="word-wrap: break-word"></div>
 
@@ -55,6 +86,15 @@
 
 
   <script>
+    const toggle = (elementId) => {
+      const el = document.getElementById(elementId);
+      if (el.classList.contains('is-hidden')) {
+        el.classList.remove('is-hidden')
+      } else {
+        el.classList.add('is-hidden')
+      }
+    };
+
     const storedFundAddress = localStorage.getItem('fundAddress');
     if (storedFundAddress) {
       document.getElementById('fundAddress').value = storedFundAddress;
@@ -68,7 +108,7 @@
           ${message}
         </div>
       `;
-      messageContainer.querySelector('.delete').addEventListener('click', function() {
+      messageContainer.querySelector('.delete').addEventListener('click', function () {
         messageContainer.innerHTML = '';
       });
     }
