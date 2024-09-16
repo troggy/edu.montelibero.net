@@ -5,96 +5,121 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MTL EDU Loan Transaction Generator</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@stellar/stellar-sdk@12.2.0/dist/stellar-sdk.min.js"></script>
+  <style>
+    :root {
+      --font-size: 14px;
+    }
+
+    details {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    details summary {
+      float: right;
+      width: 75px;
+      margin: -44px -10px -10px -10px;
+      padding: 10px 10px 10px 10px;
+    }
+
+    details[open] summary,
+    details summary:hover {
+      background: #eeeeee;
+    }
+
+    details[open] {
+      margin: -10px -10px 10px -10px;
+      padding: 10px 10px 10px 10px;
+    }
+
+    details[open] {
+      background: #f1f1f1;
+    }
+
+    h3 {
+      margin-bottom: 12px;
+    }
+
+    h4 {
+      margin-bottom: 5px;
+    }
+
+    button {
+      transition: background-color 0.1s fade-in;
+    }
+
+    button.flash {
+      background-color: var(--ins-color);
+    }
+  </style>
 </head>
 
 <body>
-  <section class="section">
-    <div class="container">
-      <h1 class="title is-2">MTL EDU Loan Transaction Generator</h1>
-      <h2 class="title is-4">Step 1. Generate Transaction <a class="is-link is-size-7 ml-2"
-          onClick="toggle('generateHelp')">help</a></h2>
+  <main class="container" style="max-width: 550px">
+    <h1>MTL EDU Loan Transaction Generator</h1>
+    <section>
+      <h3>Step 1. Generate Transaction</h3>
 
-      <div class="box is-hidden" id="generateHelp">
-        <p>Generated transaction will do the following operations:
+      <details id="generateHelp">
+        <summary>Help</summary>
+        <p>Generated transaction will do the following operations:</p>
         <ul>
-          <li>- open trustline to Debt Token on Fund Fund Account</li>
-          <li>- send given amount of EURMTL from Fund Account to Borrower Account</li>
-          <li>- mint and send same amount of Debt Token from Borrower Account to Fund Account</li>
+          <li>Open trustline to Debt Token on Fund Fund Account</li>
+          <li>Send given amount of EURMTL from Fund Account to Borrower Account</li>
+          <li>Mint and send same amount of Debt Token from Borrower Account to Fund Account</li>
         </ul>
-        </p>
-        <br />
         <p>Debt token token name will be random starting with MTLEDU prefix</p>
-        <p></p>
-      </div>
-      <form id="loanForm" class="mb-5">
-        <div class="field">
-          <label class="label" for="amount">Loan Amount:</label>
-          <div class="control">
-            <input class="input" type="number" id="amount" required>
-          </div>
-        </div>
+      </details>
 
-        <div class="field">
-          <label class="label" for="borrowerAddress">Borrower Address:</label>
-          <div class="control">
-            <input class="input" type="text" id="borrowerAddress" required>
-          </div>
-        </div>
+      <form id="loanForm">
+        <label for="amount">
+          Loan Amount:
+          <input type="number" id="amount" required>
+        </label>
 
-        <div class="field">
-          <label class="label" for="fundAddress">Fund Address:</label>
-          <div class="control">
-            <input class="input" type="text" id="fundAddress" required>
-          </div>
-        </div>
+        <label for="borrowerAddress">
+          Borrower Address:
+          <input type="text" id="borrowerAddress" required>
+        </label>
 
-        <div class="field">
-          <div class="control">
-            <button type="submit" class="button is-primary">Generate Transaction</button>
-          </div>
-        </div>
+        <label for="fundAddress">
+          Fund Address:
+          <input type="text" id="fundAddress" required>
+        </label>
+
+        <button type="submit" class="contrast">Generate Transaction</button>
       </form>
-    </div>
-    <div class="container is-hidden" id="resultContainer">
-      <h2 class="title is-4">Step 2. Sign transaction <a class="is-link is-size-7 ml-2"
-          onClick="toggle('signHelp')">help</a></h2>
-      <div class="box is-hidden" id="signHelp">
+    </section>
+
+    <section id="resultContainer" hidden>
+      <h3>Step 2. Sign transaction</h3>
+      <details id="signHelp">
+        <summary>Help</summary>
         <p>Transaction needs to be signed by both Borrower and Fund, so it is multisig.</p>
         <p>The easiest way to do this is to add XDR to <a href="https://eurmtl.me/sign_tools" target="_blank">EURMTL
             Sign Tools</a>:</p>
-        <p>
         <ul>
-          <li>- paste XDR to Sign Tools, add some description and click 'Create'</li>
-          <li>- sign tx with Fund Private Key (may be done on Sign Tools directly or in MyMTLWallet or in Stellar
+          <li>Paste XDR to Sign Tools, add some description and click 'Create'</li>
+          <li>Sign tx with Fund Private Key (may be done on Sign Tools directly or in MyMTLWallet or in Stellar
             Laboratory)</li>
-          <li>- share the link with Borrower so he can sign too</li>
-          <li>- once both signed, submit tx to the network (can be done in Sign Tools)</li>
+          <li>Share the link with Borrower so he can sign too</li>
+          <li>Once both signed, submit tx to the network (can be done in Sign Tools)</li>
         </ul>
-        </p>
-      </div>
-      <h2 class="subtitle">Transaction XDR:</h2>
-      <div id="result" class="box has-background-light mb-3" style="word-wrap: break-word"></div>
+      </details>
+      <h4>Transaction XDR:</h4>
+      <pre id="result" style="text-wrap: wrap; padding: 15px;"></pre>
 
-      <button id="copyButton" class="button is-info">Copy to Clipboard</button>
-      <button id="openSignToolsButton" class="button is-link">Open EURMTL Sign Tools</button>
-    </div>
-    <div id="messageContainer" class="container mt-3"></div>
-  </section>
-
+      <button id="copyButton" class="contrast">Copy to Clipboard</button>
+      <button id="openSignToolsButton" class="contrast">Open EURMTL Sign Tools</button>
+    </section>
+    <div id="messageContainer"></div>
+  </main>
 
   <script>
     const MTLEDU_FUND = 'GABOMZUBRFU77LRHZY6ZPA6F463QJDK2J54S66QV7LQUTS5B7X54MEDU';
-
-    const toggle = (elementId) => {
-      const el = document.getElementById(elementId);
-      if (el.classList.contains('is-hidden')) {
-        el.classList.remove('is-hidden')
-      } else {
-        el.classList.add('is-hidden')
-      }
-    };
 
     const storedFundAddress = localStorage.getItem('fundAddress') || MTLEDU_FUND;
     document.getElementById('fundAddress').value = storedFundAddress;
@@ -102,14 +127,11 @@
     function showMessage(message, isError = false) {
       const messageContainer = document.getElementById('messageContainer');
       messageContainer.innerHTML = `
-        <div class="notification ${isError ? 'is-danger' : 'is-success'}">
-          <button class="delete"></button>
+        <div role="alert" ${isError ? 'aria-invalid="true"' : ''}>
           ${message}
+          <button aria-label="Close" onClick="this.parentElement.remove()">✕</button>
         </div>
       `;
-      messageContainer.querySelector('.delete').addEventListener('click', function () {
-        messageContainer.innerHTML = '';
-      });
     }
 
     async function createLoanTransaction(assetName, amount, fundAccountPubKey, borrowerAccountPubKey) {
@@ -146,10 +168,17 @@
       window.open('https://eurmtl.me/sign_tools', '_blank');
     });
 
-    document.getElementById('copyButton').addEventListener('click', function () {
+    const copyBtn = document.getElementById('copyButton');
+    copyBtn.addEventListener('click', function () {
       const xdr = document.getElementById('result').textContent;
       navigator.clipboard.writeText(xdr).then(function () {
-        showMessage('Transaction XDR copied to clipboard!');
+        const buttonText = copyBtn.textContent;
+        copyBtn.textContent = 'Transaction XDR copied to clipboard!';
+        copyBtn.classList.add('flash');
+        setTimeout(() => {
+          copyBtn.classList.remove('flash');
+          copyBtn.textContent = buttonText;
+        }, 3000);
       }, function (err) {
         console.error('Could not copy text: ', err);
         showMessage('Could not copy text to clipboard.', true);
@@ -166,7 +195,7 @@
 
       try {
         const xdr = await createLoanTransaction(assetName, amount, fundAddress, borrowerAddress);
-        document.getElementById('resultContainer').classList.remove('is-hidden');
+        document.getElementById('resultContainer').hidden = false;
         document.getElementById('result').textContent = xdr;
       } catch (error) {
         showMessage(`Error: ${error.message}`, true);
