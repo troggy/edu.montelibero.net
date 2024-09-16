@@ -4,208 +4,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MTL EDU Loan Transaction Generator</title>
+  <title>MTLEDU </title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/@stellar/stellar-sdk@12.2.0/dist/stellar-sdk.min.js"></script>
+  <link rel="stylesheet" href="style.css">
   <style>
-    :root {
-      --font-size: 14px;
+    .buttons {
+      text-align: center;
     }
 
-    details {
-      border-bottom: none;
-      margin-bottom: 0;
-      padding-bottom: 0;
-    }
-
-    details summary {
-      float: right;
-      width: 75px;
-      margin: -44px -10px -10px -10px;
-      padding: 10px 10px 10px 10px;
-    }
-
-    details[open] summary,
-    details summary:hover {
-      background: #eeeeee;
-    }
-
-    details[open] {
-      margin: -10px -10px 10px -10px;
-      padding: 10px 10px 10px 10px;
-    }
-
-    details[open] {
-      background: #f1f1f1;
-    }
-
-    h3 {
-      margin-bottom: 12px;
-    }
-
-    h4 {
-      margin-bottom: 5px;
-    }
-
-    button {
-      transition: background-color 0.1s fade-in;
-    }
-
-    button.flash {
-      background-color: var(--ins-color);
+    .buttons a.link {
+      display: inline-block;
+      padding: var(--form-element-spacing-vertical) var(--form-element-spacing-horizontal);
     }
   </style>
 </head>
 
 <body>
   <main class="container" style="max-width: 550px">
-    <h1>MTL EDU Loan Transaction Generator</h1>
+    <h1>Кредиты на образование для участников Ассоциации Монтелиберо</h1>
     <section>
-      <h3>Step 1. Generate Transaction</h3>
+      <p>Хотите пройти платный образовательный курс, семинар или мастер-класс, который поможет вам увеличить ваш доход?
+      </p>
 
-      <details id="generateHelp">
-        <summary>Help</summary>
-        <p>Generated transaction will do the following operations:</p>
-        <ul>
-          <li>Open trustline to Debt Token on Fund Fund Account</li>
-          <li>Send given amount of EURMTL from Fund Account to Borrower Account</li>
-          <li>Mint and send same amount of Debt Token from Borrower Account to Fund Account</li>
-        </ul>
-        <p>Debt token token name will be random starting with MTLEDU prefix</p>
-      </details>
+      <p>Инициатор программы предоставляет беспроцентный и бессрочный заём. Можно возвращать с удобным вам графиком.</p
+        <p>Условия:
+      <ol>
+        <li>Иметь счет Stellar в <a href="https://t.me/MyMTLWalletBot" target="_blank">@MyMTLWalletBot</a> или другом кошельке.</li>
+        <li>Быть верифицированным участником <a href="https://montelibero.org/mtla/" target="_blank">Ассоциации Монтелиберо (МТЛА)</a>.</li>
+        <li>Обучение должно быть направлено на повышение вашего заработка.</li>
+        <li>Готовность оплатить 30% стоимости обучения самостоятельно.</li>
+      </ol>
+      </p>
 
-      <form id="loanForm">
-        <label for="amount">
-          Loan Amount:
-          <input type="number" id="amount" required>
-        </label>
-
-        <label for="borrowerAddress">
-          Borrower Address:
-          <input type="text" id="borrowerAddress" required>
-        </label>
-
-        <label for="fundAddress">
-          Fund Address:
-          <input type="text" id="fundAddress" required>
-        </label>
-
-        <button type="submit" class="contrast">Generate Transaction</button>
-      </form>
+      <p>Мы надеемся, что в будущем те, кому мы помогли, также помогут новым студентам. Вдохновляющая цепочка поддержки
+        от выпускника к новым студентам — как в лучших университетах США!</p <p>Программа не распространяется на курсы,
+      не направленные на повышение вашего заработка. Например, гендерные исследования и подобные темы исключены.</p>
+      <div class="buttons">
+        <a class="button" href="https://t.me/mtl_helper_bot" target="_blank">Подать заявку</a>
+        <a class="link" href="https://t.me/mtl_edu" target="_blank" style="margin: 0 auto;">Чат инициативы</button>
+      </div>
     </section>
-
-    <section id="resultContainer" hidden>
-      <h3>Step 2. Sign transaction</h3>
-      <details id="signHelp">
-        <summary>Help</summary>
-        <p>Transaction needs to be signed by both Borrower and Fund, so it is multisig.</p>
-        <p>The easiest way to do this is to add XDR to <a href="https://eurmtl.me/sign_tools" target="_blank">EURMTL
-            Sign Tools</a>:</p>
-        <ul>
-          <li>Paste XDR to Sign Tools, add some description and click 'Create'</li>
-          <li>Sign tx with Fund Private Key (may be done on Sign Tools directly or in MyMTLWallet or in Stellar
-            Laboratory)</li>
-          <li>Share the link with Borrower so he can sign too</li>
-          <li>Once both signed, submit tx to the network (can be done in Sign Tools)</li>
-        </ul>
-      </details>
-      <h4>Transaction XDR:</h4>
-      <pre id="result" style="text-wrap: wrap; padding: 15px; cursor: pointer"></pre>
-
-      <button id="copyButton" class="contrast">Copy to Clipboard</button>
-      <button id="openSignToolsButton" class="contrast">Open EURMTL Sign Tools</button>
-    </section>
-    <div id="messageContainer"></div>
   </main>
 
-  <script>
-    const MTLEDU_FUND = 'GABOMZUBRFU77LRHZY6ZPA6F463QJDK2J54S66QV7LQUTS5B7X54MEDU';
 
-    const storedFundAddress = localStorage.getItem('fundAddress') || MTLEDU_FUND;
-    document.getElementById('fundAddress').value = storedFundAddress;
-
-    function showMessage(message, isError = false) {
-      const messageContainer = document.getElementById('messageContainer');
-      messageContainer.innerHTML = `
-        <div role="alert" ${isError ? 'aria-invalid="true"' : ''}>
-          ${message}
-          <button aria-label="Close" onClick="this.parentElement.remove()">✕</button>
-        </div>
-      `;
-    }
-
-    async function createLoanTransaction(assetName, amount, fundAccountPubKey, borrowerAccountPubKey) {
-      const server = new StellarSdk.Horizon.Server('https://horizon.stellar.org');
-      const fundAccount = await server.loadAccount(fundAccountPubKey);
-      const debtAsset = new StellarSdk.Asset(assetName, borrowerAccountPubKey);
-      const eurmtlAsset = new StellarSdk.Asset('EURMTL', 'GACKTN5DAZGWXRWB2WLM6OPBDHAMT6SJNGLJZPQMEZBUR4JUGBX2UK7V');
-
-      const transaction = new StellarSdk.TransactionBuilder(fundAccount, {
-        fee: await server.fetchBaseFee(),
-        networkPassphrase: StellarSdk.Networks.PUBLIC,
-      })
-        .addOperation(StellarSdk.Operation.changeTrust({
-          asset: debtAsset,
-        }))
-        .addOperation(StellarSdk.Operation.payment({
-          source: borrowerAccountPubKey,
-          destination: fundAccountPubKey,
-          asset: debtAsset,
-          amount: amount,
-        }))
-        .addOperation(StellarSdk.Operation.payment({
-          destination: borrowerAccountPubKey,
-          asset: eurmtlAsset,
-          amount: amount,
-        }))
-        .setTimeout(7 * 24 * 60 * 60)
-        .build();
-
-      return transaction.toXDR();
-    }
-
-    document.getElementById('openSignToolsButton').addEventListener('click', function () {
-      window.open('https://eurmtl.me/sign_tools', '_blank');
-    });
-
-    const copyBtn = document.getElementById('copyButton');
-    const copyToClipboard = () => {
-      const xdr = document.getElementById('result').textContent;
-      navigator.clipboard.writeText(xdr).then(function () {
-        const buttonText = copyBtn.textContent;
-        copyBtn.textContent = 'Transaction XDR copied to clipboard!';
-        copyBtn.classList.add('flash');
-        setTimeout(() => {
-          copyBtn.classList.remove('flash');
-          copyBtn.textContent = buttonText;
-        }, 3000);
-      }, function (err) {
-        console.error('Could not copy text: ', err);
-        showMessage('Could not copy text to clipboard.', true);
-      });
-    };
-
-
-    document.getElementById('result').addEventListener('click', copyToClipboard);
-    copyBtn.addEventListener('click', copyToClipboard);
-
-    document.getElementById('loanForm').addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const amount = document.getElementById('amount').value;
-      const borrowerAddress = document.getElementById('borrowerAddress').value;
-      const fundAddress = document.getElementById('fundAddress').value;
-      localStorage.setItem('fundAddress', fundAddress);
-      const assetName = `MTLEDU${String(Math.floor(Math.random() * 9999) + 1).padStart(4, '0')}`;
-
-      try {
-        const xdr = await createLoanTransaction(assetName, amount, fundAddress, borrowerAddress);
-        document.getElementById('resultContainer').hidden = false;
-        document.getElementById('result').textContent = xdr;
-      } catch (error) {
-        showMessage(`Error: ${error.message}`, true);
-      }
-    });
-  </script>
 </body>
 
 </html>

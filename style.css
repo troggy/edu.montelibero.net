@@ -1,0 +1,39 @@
+:root {
+  --font-size: 14px;
+}
+
+h3 {
+  margin-bottom: 12px;
+}
+
+h4 {
+  margin-bottom: 5px;
+}
+
+.button {
+  text-decoration: none;
+  display: block;
+  padding: var(--form-element-spacing-vertical) var(--form-element-spacing-horizontal);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
+  background-color: var(--background-color);
+  color: var(--color);
+  font-weight: var(--font-weight);
+  font-size: 1rem;
+  line-height: var(--line-height);
+  text-align: center;
+  cursor: pointer;
+  transition: background-color var(--transition), border-color var(--transition), color var(--transition), box-shadow var(--transition);
+  --background-color: var(--contrast);
+  --border-color: var(--contrast);
+  --color: var(--contrast-inverse);
+  cursor: pointer;
+}
+
+.button:hover,
+.button:active,
+.button:focus {
+  --background-color: var(--contrast-hover);
+  --border-color: var(--contrast-hover);
+  --color: var(--contrast-inverse);
+}
