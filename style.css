@@ -37,3 +37,13 @@ h4 {
   --border-color: var(--contrast-hover);
   --color: var(--contrast-inverse);
 }
+
+.buttons {
+  text-align: center;
+}
+
+.buttons a.link {
+  cursor: pointer;
+  display: inline-block;
+  padding: var(--form-element-spacing-vertical) var(--form-element-spacing-horizontal);
+}

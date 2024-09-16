@@ -48,7 +48,7 @@
 
 <body>
   <main class="container" style="max-width: 550px">
-    <h1>MTL EDU Loan Transaction Generator</h1>
+    <h1>Loan Transaction Generator</h1>
     <section>
       <h3>Step 1. Generate Transaction</h3>
 
@@ -65,18 +65,13 @@
 
       <form id="loanForm">
         <label for="amount">
-          Loan Amount:
-          <input type="number" id="amount" required>
+          Loan Amount in EURMTL:
+          <input type="number" id="amount" placeholder="300" required>
         </label>
 
         <label for="borrowerAddress">
-          Borrower Address:
-          <input type="text" id="borrowerAddress" required>
-        </label>
-
-        <label for="fundAddress">
-          Fund Address:
-          <input type="text" id="fundAddress" required>
+          Borrower Account:
+          <input type="text" id="borrowerAddress" placeholder="GDFJYHAFR..." required>
         </label>
 
         <button type="submit" class="contrast">Generate Transaction</button>
@@ -84,34 +79,41 @@
     </section>
 
     <section id="resultContainer" hidden>
-      <h3>Step 2. Sign transaction</h3>
-      <details id="signHelp">
-        <summary>Help</summary>
-        <p>Transaction needs to be signed by both Borrower and Fund, so it is multisig.</p>
-        <p>The easiest way to do this is to add XDR to <a href="https://eurmtl.me/sign_tools" target="_blank">EURMTL
-            Sign Tools</a>:</p>
-        <ul>
-          <li>Paste XDR to Sign Tools, add some description and click 'Create'</li>
-          <li>Sign tx with Fund Private Key (may be done on Sign Tools directly or in MyMTLWallet or in Stellar
-            Laboratory)</li>
-          <li>Share the link with Borrower so he can sign too</li>
-          <li>Once both signed, submit tx to the network (can be done in Sign Tools)</li>
-        </ul>
-      </details>
-      <h4>Transaction XDR:</h4>
+      <h3>Step 2. Import transaction to EURMTL Sign Tools</h3>
+      <h4>Copy transaction XDR:</h4>
       <pre id="result" style="text-wrap: wrap; padding: 15px; cursor: pointer"></pre>
 
       <button id="copyButton" class="contrast">Copy to Clipboard</button>
       <button id="openSignToolsButton" class="contrast">Open EURMTL Sign Tools</button>
+
+      <div class="buttons" id="postTxStepsPrompt">
+        <a class="link" onClick="showPostTxSteps()">Show next steps</a>
+      </div>
     </section>
+
+    <section class="postTxSection" hidden>
+      <h3>Step 3. Sign transaction yourself</h3>
+      After import you should have a transaction URL like <code>https://eurmtl.me/sign_tools/b220e19e...</code> in your
+      Sign Tools.
+      Open it and sign transaction with your key (which should be a signer on MTLEDU fund account)
+    </section>
+
+    <section class="postTxSection" hidden>
+      <h3>Step 4. Share transaction URL with the borrower so he can sign</h3>
+      Share your transaction URL with the borrower. He should sign the transaction in Sign Tools using his account (the
+      one you have used on Step 1).
+    </section>
+
+    <section class="postTxSection" hidden>
+      <h3>Step 5. Submit transaction to the blockchain</h3>
+      Once you have both signatures, open your transaction URL and click "Send to Stellar" button
+    </section>
+
     <div id="messageContainer"></div>
   </main>
 
   <script>
     const MTLEDU_FUND = 'GABOMZUBRFU77LRHZY6ZPA6F463QJDK2J54S66QV7LQUTS5B7X54MEDU';
-
-    const storedFundAddress = localStorage.getItem('fundAddress') || MTLEDU_FUND;
-    document.getElementById('fundAddress').value = storedFundAddress;
 
     function showMessage(message, isError = false) {
       const messageContainer = document.getElementById('messageContainer');
@@ -122,6 +124,11 @@
         </div>
       `;
     }
+
+    const showPostTxSteps = () => {
+      Array.from(document.getElementsByClassName('postTxSection')).forEach(el => el.hidden = false);
+      postTxStepsPrompt.hidden = true;
+    };
 
     async function createLoanTransaction(assetName, amount, fundAccountPubKey, borrowerAccountPubKey) {
       const server = new StellarSdk.Horizon.Server('https://horizon.stellar.org');
@@ -155,6 +162,7 @@
 
     document.getElementById('openSignToolsButton').addEventListener('click', function () {
       window.open('https://eurmtl.me/sign_tools', '_blank');
+      showPostTxSteps();
     });
 
     const copyBtn = document.getElementById('copyButton');
@@ -182,12 +190,10 @@
       e.preventDefault();
       const amount = document.getElementById('amount').value;
       const borrowerAddress = document.getElementById('borrowerAddress').value;
-      const fundAddress = document.getElementById('fundAddress').value;
-      localStorage.setItem('fundAddress', fundAddress);
       const assetName = `MTLEDU${String(Math.floor(Math.random() * 9999) + 1).padStart(4, '0')}`;
 
       try {
-        const xdr = await createLoanTransaction(assetName, amount, fundAddress, borrowerAddress);
+        const xdr = await createLoanTransaction(assetName, amount, MTLEDU_FUND, borrowerAddress);
         document.getElementById('resultContainer').hidden = false;
         document.getElementById('result').textContent = xdr;
       } catch (error) {
