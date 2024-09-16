@@ -110,7 +110,7 @@
         </ul>
       </details>
       <h4>Transaction XDR:</h4>
-      <pre id="result" style="text-wrap: wrap; padding: 15px;"></pre>
+      <pre id="result" style="text-wrap: wrap; padding: 15px; cursor: pointer"></pre>
 
       <button id="copyButton" class="contrast">Copy to Clipboard</button>
       <button id="openSignToolsButton" class="contrast">Open EURMTL Sign Tools</button>
@@ -169,7 +169,7 @@
     });
 
     const copyBtn = document.getElementById('copyButton');
-    copyBtn.addEventListener('click', function () {
+    const copyToClipboard = () => {
       const xdr = document.getElementById('result').textContent;
       navigator.clipboard.writeText(xdr).then(function () {
         const buttonText = copyBtn.textContent;
@@ -183,7 +183,11 @@
         console.error('Could not copy text: ', err);
         showMessage('Could not copy text to clipboard.', true);
       });
-    });
+    };
+
+
+    document.getElementById('result').addEventListener('click', copyToClipboard);
+    copyBtn.addEventListener('click', copyToClipboard);
 
     document.getElementById('loanForm').addEventListener('submit', async function (e) {
       e.preventDefault();
