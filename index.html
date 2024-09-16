@@ -85,6 +85,8 @@
 
 
   <script>
+    const MTLEDU_FUND = 'GABOMZUBRFU77LRHZY6ZPA6F463QJDK2J54S66QV7LQUTS5B7X54MEDU';
+
     const toggle = (elementId) => {
       const el = document.getElementById(elementId);
       if (el.classList.contains('is-hidden')) {
@@ -94,10 +96,8 @@
       }
     };
 
-    const storedFundAddress = localStorage.getItem('fundAddress');
-    if (storedFundAddress) {
-      document.getElementById('fundAddress').value = storedFundAddress;
-    }
+    const storedFundAddress = localStorage.getItem('fundAddress') || MTLEDU_FUND;
+    document.getElementById('fundAddress').value = storedFundAddress;
 
     function showMessage(message, isError = false) {
       const messageContainer = document.getElementById('messageContainer');
