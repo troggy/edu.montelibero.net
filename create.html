@@ -60,7 +60,7 @@
           <li>Send given amount of EURMTL from Fund Account to Borrower Account</li>
           <li>Mint and send same amount of Debt Token from Borrower Account to Fund Account</li>
         </ul>
-        <p>Debt token token name will be random starting with MTLEDU prefix</p>
+        <p>Debt token token name will be random starting with MTLEDU prefix if not specified</p>
       </details>
 
       <form id="loanForm">
@@ -72,6 +72,13 @@
         <label for="borrowerAddress">
           Borrower Account:
           <input type="text" id="borrowerAddress" placeholder="GDFJYHAFR..." required>
+        </label>
+
+        <label for="assetName">
+          Debt Token Postfix (optional, maximum 6 characters, only digits and letters):
+          <input type="text" id="assetName" placeholder="EvgPet" maxlength="6"
+            onkeydown="return /[a-zA-Z0-9]/i.test(event.key)">
+          <p id="assetNamePreview" class="preview"></p>
         </label>
 
         <button type="submit" class="contrast">Generate Transaction</button>
@@ -114,6 +121,16 @@
 
   <script>
     const MTLEDU_FUND = 'GABOMZUBRFU77LRHZY6ZPA6F463QJDK2J54S66QV7LQUTS5B7X54MEDU';
+
+    document.getElementById('assetName').addEventListener('input', function () {
+      const preview = document.getElementById('assetNamePreview');
+      if (this.value) {
+        preview.textContent = 'Asset name will be the following: MTLEDU' + this.value;
+      } else {
+        preview.textContent = 'Asset name will be random prefixed with MTLEDU';
+      }
+    });
+
 
     function showMessage(message, isError = false) {
       const messageContainer = document.getElementById('messageContainer');
@@ -190,7 +207,13 @@
       e.preventDefault();
       const amount = document.getElementById('amount').value;
       const borrowerAddress = document.getElementById('borrowerAddress').value;
-      const assetName = `MTLEDU${String(Math.floor(Math.random() * 9999) + 1).padStart(4, '0')}`;
+      let assetName = document.getElementById('assetName').value;
+
+      if (!assetName) {
+        assetName = `MTLEDU${String(Math.floor(Math.random() * 9999) + 1).padStart(4, '0')}`;
+      } else {
+        assetName = `MTLEDU${assetName}`;
+      }
 
       try {
         const xdr = await createLoanTransaction(assetName, amount, MTLEDU_FUND, borrowerAddress);
