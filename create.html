@@ -22,18 +22,24 @@
       padding: 10px 10px 10px 10px;
     }
 
-    details[open] summary,
-    details summary:hover {
-      background: #eeeeee;
-    }
-
     details[open] {
       margin: -10px -10px 10px -10px;
       padding: 10px 10px 10px 10px;
     }
 
+    details[open] summary,
+    details summary:hover,
     details[open] {
-      background: #f1f1f1;
+      background: rgba(241, 241, 241, 1);
+    }
+
+    @media only screen and (prefers-color-scheme: dark) {
+
+      details[open] summary,
+      details summary:hover,
+      details[open] {
+        background: rgba(241, 241, 241, 0.1);
+      }
     }
 
     button {
